@@ -1119,8 +1119,8 @@ END:VCALENDAR\r
           final event = invite.children.first;
           event.checkValidity();
           expect(event, isA<VEvent>());
-          expect((event as VEvent).start, DateTime.utc(2021, 07, 21, 0, 00));
-          expect(event['DTSTART']?.textValue, '20210721T000000Z');
+          expect((event as VEvent).start, DateTime(2021, 07, 21, 0, 00));
+          expect(event['DTSTART']?.textValue, '20210721');
           expect(event.end, isNull);
           expect(event.duration, IsoDuration(days: 1));
           expect(event.isAllDayEvent, isTrue);
@@ -1139,6 +1139,49 @@ END:VCALENDAR\r
           expect(event.attendees[2].email, 'c@example.com');
           expect(event.organizer, isNotNull);
           expect(event.organizer?.email, 'a@example.com');
+        },
+      );
+
+      test(
+        'All-day event with proper VALUE=DATE formatting',
+        () {
+          final invite = VCalendar.createEvent(
+            organizerEmail: 'organizer@example.com',
+            start: DateTime(2024, 01, 15),
+            end: DateTime(2024, 01, 16),
+            isAllDayEvent: true,
+            summary: 'Holiday',
+            description: 'New Year Holiday',
+            productId: 'enough_icalendar/test',
+          );
+
+          expect(invite.isVersion2, isTrue);
+          expect(invite.productId, 'enough_icalendar/test');
+          
+          final event = invite.event!;
+          expect(event.isAllDayEvent, isTrue);
+          expect(event.start, DateTime(2024, 01, 15));
+          expect(event.end, DateTime(2024, 01, 16));
+          
+          // Check that DTSTART uses VALUE=DATE format
+          final startProperty = event.getProperty('DTSTART');
+          expect(startProperty, isNotNull);
+          expect(startProperty!.textValue, '20240115');
+          expect(startProperty.getParameterValue(ParameterType.value), ValueType.date);
+          
+          // Check that DTEND uses VALUE=DATE format
+          final endProperty = event.getProperty('DTEND');
+          expect(endProperty, isNotNull);
+          expect(endProperty!.textValue, '20240116');
+          expect(endProperty.getParameterValue(ParameterType.value), ValueType.date);
+          
+          // Verify the full iCalendar output contains VALUE=DATE
+          final icalString = invite.toString();
+          expect(icalString, contains('DTSTART;VALUE=DATE:20240115'));
+          expect(icalString, contains('DTEND;VALUE=DATE:20240116'));
+          
+          // Verify no time zone information is included for all-day events
+          expect(icalString, isNot(contains('TZID=')));
         },
       );
     },

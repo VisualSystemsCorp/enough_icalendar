@@ -958,6 +958,7 @@ class VCalendar extends VComponent {
     event
       ..timeStamp = timeStamp ?? DateTime.now()
       ..uid = uid ?? createUid(organizerUri: organizer!.uri)
+      ..isAllDayEvent = isAllDayEvent
       ..start = start
       ..end = end
       ..duration = duration
@@ -965,8 +966,7 @@ class VCalendar extends VComponent {
       ..summary = summary
       ..description = description
       ..location = location
-      ..url = url
-      ..isAllDayEvent = isAllDayEvent;
+      ..url = url;
     if (attendees != null) {
       event.attendees = attendees;
     } else if (attendeeEmails != null) {
@@ -1323,7 +1323,8 @@ class VEvent extends _EventTodoJournalComponent {
   /// Sets the start date (inclusive)
   set start(DateTime? value) => setOrRemoveProperty(
       DateTimeProperty.propertyNameStart,
-      DateTimeProperty.create(DateTimeProperty.propertyNameStart, value));
+      DateTimeProperty.create(DateTimeProperty.propertyNameStart, value, 
+          isAllDay: isAllDayEvent == true));
 
   /// The end date (exclusive) of this event.
   ///
@@ -1335,7 +1336,8 @@ class VEvent extends _EventTodoJournalComponent {
   /// Sets the end date (exclusive)
   set end(DateTime? value) => setOrRemoveProperty(
       DateTimeProperty.propertyNameEnd,
-      DateTimeProperty.create(DateTimeProperty.propertyNameEnd, value));
+      DateTimeProperty.create(DateTimeProperty.propertyNameEnd, value, 
+          isAllDay: isAllDayEvent == true));
 
   /// The duration of this event.
   ///

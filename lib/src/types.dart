@@ -1223,6 +1223,12 @@ class DateHelper {
 
     return buffer.toString();
   }
+
+  static String toDateString(DateTime value) {
+    final buffer = StringBuffer();
+    renderDate(value, buffer);
+    return buffer.toString();
+  }
 }
 
 class DateTimeOrDuration {

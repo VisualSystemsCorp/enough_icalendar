@@ -1136,19 +1136,27 @@ class DateTimeProperty extends Property {
     String name,
     DateTime? value, {
     String? timeZoneId,
+    bool isAllDay = false,
   }) {
     if (value == null) {
       return null;
     }
-    final prop =
-        DateTimeProperty('$name:${DateHelper.toDateTimeString(value)}');
-    if (timeZoneId != null) {
-      prop[ParameterType.timezoneId] = TextParameter.value(
-        ParameterType.timezoneId.typeName ?? '',
-        timeZoneId,
-      );
+    
+    final dateString = isAllDay 
+        ? DateHelper.toDateString(value) 
+        : DateHelper.toDateTimeString(value);
+    
+    // Build the property definition string with parameters
+    final buffer = StringBuffer(name);
+    if (isAllDay) {
+      buffer.write(';VALUE=DATE');
     }
-    return prop;
+    if (timeZoneId != null && !isAllDay) {
+      buffer.write(';TZID=$timeZoneId');
+    }
+    buffer.write(':$dateString');
+    
+    return DateTimeProperty(buffer.toString());
   }
 }
 
